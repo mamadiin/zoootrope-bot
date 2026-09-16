@@ -77,10 +77,8 @@ async def process_payload(context: ContextTypes.DEFAULT_TYPE, chat_id: int, form
     )
 
     models_to_try = [
-        'gemini-3.6-flash',
-        'gemini-3.1-pro-preview',
-        'gemini-2.5-flash',
-        'gemini-2.5-pro'
+         'gemini-3.6-flash',
+        'gemini-3.1-pro-preview'
     ]
 
     response_text = None

@@ -2,7 +2,7 @@ import os
 import asyncio
 import threading
 from flask import Flask
-from telegram import Update, InputMediaPhoto, InputMediaVideo, InputMediaAnimation
+from telegram import Update, InputMediaPhoto, InputMediaVideo
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from google import genai
 
@@ -56,7 +56,7 @@ async def process_payload(context: ContextTypes.DEFAULT_TYPE, chat_id: int, form
         await context.bot.send_message(chat_id=chat_id, text="خطا: کلید GEMINI_API_KEY تنظیم نشده است.")
         return
 
-    status_msg = await context.bot.send_message(chat_id=chat_id, text="⏳ در حال تلخیص، ترجمه و آماده‌سازی آلبوم...")
+    status_msg = await context.bot.send_message(chat_id=chat_id, text="⏳ در حال خلاصه‌نویسی و آماده‌سازی پست...")
 
     prompt = (
         "You are an expert animation, 3D/2D animation, stop-motion, and CG editor for the @zoootrope Telegram channel.\n"
@@ -133,9 +133,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Detect media type
     media_info = None
     if msg.photo:
-        media_info = {'type': 'photo', 'file_id': msg.photo[-1].file_id['chat_id'], group_data['text'], group_data['items'])
-
-        MEDIA_GROUPS[media_group_id]['task']': msg.video.file_id}
+        media_info = {'type': 'photo', 'file_id': msg.photo[-1].file_id}
+    elif msg.video:
+        media_info = {'type': 'video', 'file_id': msg.video.file_id}
     elif msg.animation:
         media_info = {'type': 'animation', 'file_id': msg.animation.file_id}
 
@@ -161,7 +161,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             MEDIA_GROUPS[media_group_id]['task'].cancel()
 
         async def delayed_process():
-            await asyncio.sleep(2.0) # Wait 2s for all album items to arrive
+            await asyncio.sleep(2.0)  # Wait 2s for all album items to arrive
             group_data = MEDIA_GROUPS.pop(media_group_id, None)
             if group_data:
                 await process_payload(context, group_data['chat_id'], group_data['text'], group_data['items'])

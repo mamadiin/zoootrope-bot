@@ -15,7 +15,7 @@ from telegram.ext import (
 )
 
 # ==========================================
-# تنظیمات
+# تنظیمات متغیرهای محیطی
 # ==========================================
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -37,14 +37,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ==========================================
-# سرور Flask برای زنده نگه‌داشتن وب‌سرویس
+# وب‌سرور Flask برای فعال نگه داشتن سرویس
 # ==========================================
 
 server = Flask(__name__)
 
 @server.route("/")
 def index():
-    return "Bot is running fine!", 200
+    return "Bot is active!", 200
 
 def run_flask():
     port = int(os.environ.get("PORT", 10000))
@@ -54,69 +54,73 @@ def run_flask():
 # ارتباط مستقیم با Google Gemini API
 # ==========================================
 
-SYSTEM_PROMPT = (
-    "تو یک دستیار حرفه‌ای برای کانال تلگرامی تخصصی انیمیشن (@zoootrope) هستی.\n"
-    "وظیفه تو دریافت پست‌ها، اخبار، متن‌ها یا زیرنویس‌های مربوط به انیمیشن (به زبان‌های انگلیسی، روسی یا سایر زبان‌ها) "
-    "و بازنویسی یا ترجمه دقیق آن‌ها به زبان فارسی روان، جذاب و استاندارد برای انتشار در کانال است.\n\n"
-    "قوانین مهم:\n"
-    "1. لحن باید جذاب، ژورنالیستی، حرفه‌ای و خوانا باشد.\n"
-    "2. اصطلاحات تخصصی انیمیشن را درست به کار ببر.\n"
-    "3. هشتگ‌های مرتبط مثل #انیمیشن، نام کارگردان، نام استودیو یا سبک را در صورت مناسب بودن اضافه کن.\n"
-    "4. اگر متنی دارای لینک است، لینک‌ها را در ترجمه فارسی درون متن روی کلمات مناسب حفظ کن.\n"
-    "5. در انتهای متن خروجی حتماً این امضا قرار بگیرد:\n"
-    "@zoootrope"
-)
+SYSTEM_PROMPT = """
+تو یک دستیار تخصصی برای کانال انیمیشن @zoootrope هستی.
+وظیفه: متن، زیرنویس یا پست انیمیشنی زیر را به فارسی جذاب، روان و مناسب کانال تلگرام ترجمه و بازنویسی کن.
+
+قوانین:
+1. لحن باید حرفه‌ای، روان و استاندارد انیمیشن باشد.
+2. اصطلاحات انیمیشن به درستی برگردانده شوند.
+3. هشتگ‌های مرتبط مثل #انیمیشن یا نام اثر در صورت نیاز اضافه شود.
+4. اگر لینکی در متن وجود دارد، آن را در جای مناسب حفظ کن.
+5. در انتهای پیام حتماً این امضا درج شود:
+@zoootrope
+"""
 
 def generate_animation_post(text: str) -> Optional[str]:
-    # استفاده از مدل‌های پایدار و رسمی Gemini
-    models_to_try = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"]
+    models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
     
-    for model in models_to_try:
-        url = f")s",
-    level=logging.INFO,
-)
-logger = logging.getLogger(__name__)
-
-# ==========================================
-# سرور Flask برای زنده نگه‌داشتن وب‌سرویس
-# ==========================================
-
-server = Flask(__name__)
-
-@server.route("/")
-def index():
-    return "Bot is running fine!", 200
-
-def run_flask():
-    port = int(os.environ.get("PORT", 10000))
-    server.run(host="0.0.0.0", port=port)
-
-# ==========================================
-# ارتباط مستقیم با Google Gemini API
-# ==========================================
-
-SYSTEM_PROMPT = (
-    "تو یک دستیار حرفه‌ای برای کانال تلگرامی تخصصی انیمیشن (@zoootrope) هستی.\n"
-    "وظیفه تو دریافت پست‌ها، اخبار، متن‌ها یا زیرنویس‌های مربوط به انیمیشن (به زبان‌های انگلیسی، روسی یا سایر زبان‌ها) "
-    "و بازنویسی یا ترجمه دقیق آن‌ها به زبان فارسی روان، جذاب و استاندارد برای انتشار در کانال است.\n\n"
-    "قوانین مهم:\n"
-    "1. لحن باید جذاب، ژورنالیستی، حرفه‌ای و خوانا باشد.\n"
-    "2. اصطلاحات تخصصی انیمیشن را درست به کار ببر.\n"
-    "3. هشتگ‌های مرتبط مثل #انیمیشن، نام کارگردان، نام استودیو یا سبک را در صورت مناسب بودن اضافه کن.\n"
-    "4. اگر متنی دارای لینک است، لینک‌ها را در ترجمه فارسی درون متن روی کلمات مناسب حفظ کن.\n"
-    "5. در انتهای متن خروجی حتماً این امضا قرار بگیرد:\n"
-    "@zoootrope"
-)
-
-def generate_animation_post(text: str) -> Optional[str]:
-    # استفاده از مدل‌های پایدار و رسمی Gemini
-    models_to_try = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"]
+    full_prompt = f"{SYSTEM_PROMPT}\n\nمتن ورودی:\n{text}"
     
-    for model in models_to_try:
-        url = f" است.")
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": full_prompt}
+                ]
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.7
+        }
+    }
+
+    for model in models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
+        try:
+            res = requests.post(url, json=payload, timeout=45)
+            if res.status_code == 200:
+                data = res.json()
+                candidates = data.get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts and "text" in parts[0]:
+                        return parts[0]["text"]
+            else:
+                logger.error(f"Gemini {model} returned status {res.status_code}: {res.text}")
+        except Exception as e:
+            logger.error(f"Error calling {model}: {e}")
+
+    return None
+
+# ==========================================
+# هندلرهای تلگرام
+# ==========================================
+
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    welcome_text = (
+        "سلام! هر متن، خبر یا پست انیمیشنی داری بفرست تا برات ترجمه و آماده‌سازی کنم.\n\n"
+        "امضا کانال: @zoootrope"
+    )
+    await update.message.reply_text(welcome_text)
+
+async def restart_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    deploy_hook = os.getenv("RENDER_DEPLOY_HOOK")
+    if not deploy_hook:
+        await update.message.reply_text("متغیر RENDER_DEPLOY_HOOK تنظیم نشده است.")
         return
 
-    await update.message.reply_text("در حال ارسال درخواست راه‌اندازی مجدد سرور...")
+    await update.message.reply_text("در حال راه‌اندازی مجدد سرویس...")
     try:
         res = requests.post(deploy_hook, timeout=10)
         if res.status_code in [200, 201]:
@@ -139,7 +143,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     processed = generate_animation_post(text)
     if not processed:
-        await message.reply_text("خطا در پردازش با هوش مصنوعی. لطفاً لاگ سرور را بررسی کنید.")
+        await message.reply_text("خطا در ارتباط با هوش مصنوعی. لطفاً دوباره تلاش کنید.")
         return
 
     if len(processed) <= MAX_MESSAGE_LENGTH:
@@ -161,7 +165,7 @@ def main():
     app.add_handler(CommandHandler("restart", restart_command))
     app.add_handler(MessageHandler(filters.TEXT | filters.Caption(), handle_message))
 
-    print("Bot is running...")
+    print("Bot is polling...")
     app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":

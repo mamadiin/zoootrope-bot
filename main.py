@@ -50,7 +50,7 @@ gemini_model = genai.GenerativeModel('gemini-2.5-flash')
 # حافظه موقت برای آلبوم‌های چندرسانه‌ای (Media Group)
 MEDIA_GROUPS = {}
 
-def split_text_smart(text: str, max_length: int = 1000) -> list[str]:
+def split_text_smart(text: str, max_length: int = 1024) -> list[str]:
     """شکستن متن‌های بلند به بخش‌های کوچک‌تر جهت رعایت سقف ۱۰۲۴ کاراکتری کاپشن تلگرام"""
     if len(text) <= max_length:
         return [text]

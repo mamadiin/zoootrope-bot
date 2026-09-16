@@ -67,6 +67,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     try:
+        # اصلاح نام مدل جمینای به نسخه استاندارد پایدار
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=prompt,

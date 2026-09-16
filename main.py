@@ -95,8 +95,11 @@ def call_gemini(text: str, model_name: str) -> Optional[str]:
         return None
 
 def generate_animation_post(text: str) -> Optional[str]:
-    # اولویت با مدل‌های فعال و پرسرعت گوگل
-    models = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash"]
+    # استفاده از مدل‌های فعال اعلام‌شده توسط گوگل
+    models = [
+        "gemini-3.6-flash",
+        "gemini-3.1-pro-preview",
+    ]
     for model in models:
         result = call_gemini(text, model)
         if result:

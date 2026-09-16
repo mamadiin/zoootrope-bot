@@ -133,9 +133,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Detect media type
     media_info = None
     if msg.photo:
-        media_info = {'type': 'photo', 'file_id': msg.photo[-1].file_id}
-    elif msg.video:
-        media_info = {'type': 'video', 'file_id': msg.video.file_id}
+        media_info = {'type': 'photo', 'file_id': msg.photo[-1].file_id['chat_id'], group_data['text'], group_data['items'])
+
+        MEDIA_GROUPS[media_group_id]['task']': msg.video.file_id}
     elif msg.animation:
         media_info = {'type': 'animation', 'file_id': msg.animation.file_id}
 
@@ -184,42 +184,16 @@ def main():
     
     bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
     if not bot_token:
-        print("Error: TELEGRAM_,
-                'task': None
-            }
-        
-        if formatted_input and not MEDIA_GROUPS[media_group_id]['text']:
-            MEDIA_GROUPS[media_group_id]['text'] = formatted_input
+        print("Error: TELEGRAM_BOT_TOKEN environment variable not set!")
+        return
 
-        if media_info:
-            MEDIA_GROUPS[media_group_id]['items'].append(media_info)
-
-        # Cancel previous timer and reset for batch processing
-        if MEDIA_GROUPS[media_group_id]['task']:
-            MEDIA_GROUPS[media_group_id]['task'].cancel()
-
-        async def delayed_process():
-            await asyncio.sleep(2.0) # Wait 2s for all album items to arrive
-            group_data = MEDIA_GROUPS.pop(media_group_id, None)
-            if group_data:
-                await process_payload(context, group_data['chat_id'], group_data['text'], group_data['items'])
-
-        MEDIA_GROUPS[media_group_id]['task'] = asyncio.create_task(delayed_process())
-
-    else:
-        # Single message processing
-        media_items = [media_info] if media_info else []
-        await process_payload(context, msg.chat_id, formatted_input, media_items)
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "سلام! ربات زوتروپ آماده است. 🎬\n\n"
-        "هر پستی (حتی آلبوم عکس/ویدیو) بفرستید، آن را خلاصه‌نویسی کرده، بدون ایموجی و هشتگ، با حفظ لینک‌ها و با امضای @zoootrope خروجی می‌دهد."
-    )
-
-def main():
-    threading.Thread(target=run_flask, daemon=True).start()
+    application = ApplicationBuilder().token(bot_token).build()
     
-    bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
-    if not bot_token:
-        print("Error: TELEGRAM_
+    application.add_handler(CommandHandler('start', start))
+    application.add_handler(MessageHandler(filters.TEXT | filters.PHOTO | filters.VIDEO | filters.ANIMATION | filters.CAPTION, handle_message))
+    
+    print("Zoootrope Bot is running...")
+    application.run_polling(drop_pending_updates=True)
+
+if __name__ == '__main__':
+    main()

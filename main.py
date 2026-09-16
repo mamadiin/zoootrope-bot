@@ -32,7 +32,7 @@ if not GEMINI_API_KEY:
 genai.configure(api_key=GEMINI_API_KEY)
 
 # مدل پایدار و مطمئن
-MODEL_NAME = "gemini-1.5-flash"
+MODEL_NAME = "gemini-1.5-flash-latest"
 SIGNATURE = "@zoootrope"
 MAX_MESSAGE_LENGTH = 4000
 

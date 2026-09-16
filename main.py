@@ -1,40 +1,48 @@
 import os
 import threading
 from flask import Flask
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+from telegram.ext import ApplicationBuilder, CommandHandler
 
-# 1. تنظیمات وب‌سرور برای رندر (حیاتی برای سرویس رایگان)
+# -----------------------------
+# Flask app برای Render
+# -----------------------------
 flask_app = Flask(__name__)
 
-@flask_app.route('/')
+@flask_app.route("/")
 def home():
     return "Bot is running!"
 
 def run_flask():
-    # رندر معمولا روی پورت 10000 کار می‌کند
-    flask_app.run(host='0.0.0.0', port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    flask_app.run(host="0.0.0.0", port=port)
 
-# شروع وب‌سرور در یک ترد جداگانه
-threading.Thread(target=run_flask, daemon=True).start()
-
-# 2. منطق اصلی ربات تلگرام
+# -----------------------------
+# هندلرهای ربات
+# -----------------------------
 async def start(update, context):
-    await update.message.reply_text("سلام! ربات فعال است.")
+    await update.message.reply_text("سلام! ربات فعاله ✅")
 
+# -----------------------------
+# اجرای اصلی
+# -----------------------------
 def main():
-    # دریافت توکن‌ها از محیط (در پنل رندر تنظیم کردید)
-    BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-    
-    # ساخت اپلیکیشن ربات
-    application = ApplicationBuilder().token(BOT_TOKEN).build()
-    
-    # اینجا هندلرهای خودت را اضافه کن
-    start_handler = CommandHandler('start', start)
-    application.add_handler(start_handler)
-    
-    # اجرای ربات
-    print("Bot is starting...")
-    application.run_polling()
+    bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    if not bot_token:
+        raise RuntimeError("TELEGRAM_BOT_TOKEN is not set")
 
-if __name__ == '__main__':
+    application = ApplicationBuilder().token(bot_token).build()
+
+    # مهم: حذف webhook قبلی برای جلوگیری از Conflict
+    application.bot.delete_webhook(drop_pending_updates=True)
+
+    application.add_handler(CommandHandler("start", start))
+
+    print("Starting Flask server...")
+    threading.Thread(target=run_flask, daemon=True).start()
+
+    print("Starting Telegram bot...")
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
+
+if __name__ == "__main__":
+    from telegram import Update
     main()
